@@ -4,6 +4,16 @@ using UnityEngine;
 
 public class GazeableObject : MonoBehaviour
 {
+    public bool isTransformable = false;
+
+    private int objectLayer;
+    private const int IGNORE_RAYCAST_LAYER = 2;
+
+    private Vector3 initialObjectRotation;
+    private Vector3 initialPlayerRotation;
+
+    private Vector3 initialObjectScale;
+
     public virtual void OnGazeEnter(RaycastHit hitInfo)
     {
         Debug.Log("Gaze entered on " + gameObject.name);
@@ -23,16 +33,115 @@ public class GazeableObject : MonoBehaviour
     public virtual void OnPress(RaycastHit hitInfo)
     {
         Debug.Log("Button pressed");
+
+        if (isTransformable)
+        {
+            objectLayer = gameObject.layer;
+            gameObject.layer = IGNORE_RAYCAST_LAYER;
+
+            initialObjectRotation = transform.rotation.eulerAngles;
+            initialPlayerRotation = Camera.main.transform.rotation.eulerAngles;
+            initialObjectScale = transform.localScale;
+        }
     }
 
     public virtual void OnHold(RaycastHit hitInfo)
     {
         Debug.Log("Button held");
 
+        if (isTransformable)
+        {
+            GazeTransform(hitInfo);
+        }
+
     }
 
     public virtual void OnRelease(RaycastHit hitInfo)
     {
         Debug.Log("Button released");
+
+        if (isTransformable)
+        {
+            gameObject.layer = objectLayer;
+        }
     }
+
+    public virtual void GazeTransform(RaycastHit hitInfo)
+    {
+        switch(Player.instance.activeMode)
+        {
+            case InputMode.TRANSLATE:
+                GazeTranslate(hitInfo);
+                break;
+
+            case InputMode.SCALE:
+                GazeScale(hitInfo);
+                break;
+
+            case InputMode.ROTATE:
+                GazeRotate(hitInfo);
+                break;
+        }
+    }
+
+    public virtual void GazeTranslate(RaycastHit hitInfo)
+    {
+        if (hitInfo.collider != null && hitInfo.collider.GetComponent<Floor>())
+        {
+            transform.position = hitInfo.point;
+        }
+
+    }
+
+    public virtual void GazeScale(RaycastHit hitInfo)
+    {
+        float scaleSpeed = .1f;
+
+        float scaleFactor = 1;
+
+        Vector3 currentPlayerRotation = Camera.main.transform.rotation.eulerAngles;
+        Vector3 rotationDelta = currentPlayerRotation - initialPlayerRotation;
+
+        // if looking up
+        if (rotationDelta.x <0 && rotationDelta.x >-180.0f || rotationDelta.x >180.0f && rotationDelta.x < 360.0f)
+        {
+            // if greater than 180, normalize between 0-180
+            if (rotationDelta.x >180.0f)
+            {
+                rotationDelta.x = 360 - rotationDelta.x;
+            }
+
+            scaleFactor = 1.0f + Mathf.Abs(rotationDelta.x) * scaleSpeed;
+        }
+        else
+        {
+            if (rotationDelta.x <-180.0f)
+            {
+                rotationDelta.x = 360.0f + rotationDelta.x;
+            }
+
+            scaleFactor = Mathf.Max(0.1f, 1.0f - (Mathf.Abs(rotationDelta.x) * (1.0f/scaleSpeed)) / 180.0f);
+        }
+
+        transform.localScale = scaleFactor * initialObjectScale;
+
+    }
+
+    public virtual void GazeRotate(RaycastHit hitInfo)
+    {
+        float rotationSpeed = 5.0f;
+
+        Vector3 currentPlayerRotation = Camera.main.transform.rotation.eulerAngles;
+        Vector3 currentObjectRotation = transform.rotation.eulerAngles;
+
+        Vector3 rotationDelta = currentPlayerRotation - initialPlayerRotation;
+
+        Vector3 newRotation = new Vector3(currentObjectRotation.x,
+                                          initialObjectRotation.y + (rotationDelta.y * rotationSpeed),
+                                          currentObjectRotation.z);
+
+        transform.rotation = Quaternion.Euler(newRotation);   
+    }
+
+
 }
