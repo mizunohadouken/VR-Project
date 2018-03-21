@@ -10,7 +10,8 @@ public enum InputMode
     OBJ_PLACEMENT,
     TRANSLATE,
     ROTATE,
-    SCALE
+    SCALE,
+    DRAG
 }
 
 public class Player : MonoBehaviour {

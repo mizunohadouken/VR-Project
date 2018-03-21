@@ -320,6 +320,7 @@ GameObject:
   - component: {fileID: 414676}
   - component: {fileID: 3390464}
   - component: {fileID: 2392304}
+  - component: {fileID: 114238041904780062}
   m_Layer: 0
   m_Name: mob_Cabin
   m_TagString: Untagged
@@ -2340,6 +2341,21 @@ Prefab:
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 154588}
   m_IsPrefabParent: 1
+--- !u!114 &114238041904780062
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 149046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbf3575480402db40813e763382412fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  color: 0
+  eraseRenderer: 0
+  originalLayer: 0
+  originalMaterials: []
 --- !u!114 &114850974406811930
 MonoBehaviour:
   m_ObjectHideFlags: 1
